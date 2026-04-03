@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASE Social Strategy</title>
+<style>
+:root{
+  --bg:#09090e;--s1:#0f0f18;--s2:#15151f;
+  --acc:#d4f03a;--acc2:#3af0c8;
+  --txt:#eeeae2;--muted:#8a8798;--border:rgba(255,255,255,0.09);
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'Courier New',Courier,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:var(--sans);}
+
+.deck{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:52px 72px 100px;overflow:hidden;}
+.slide.active{display:flex;}
+.slide.active .inner{animation:fadeUp .45s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+.gbg{
+  position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(212,240,58,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(212,240,58,0.04) 1px,transparent 1px);
+  background-size:54px 54px;
+  -webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);
+}
+.gorb{position:absolute;pointer-events:none;z-index:0;border-radius:50%;animation:orb 7s ease-in-out infinite;}
+@keyframes orb{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.08);opacity:1;}}
+
+.inner{position:relative;z-index:1;width:100%;max-width:1200px;margin:0 auto;}
+.snum{position:absolute;top:20px;right:28px;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;z-index:2;}
+
+/* nav */
+.nav{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:999;display:flex;align-items:center;gap:10px;background:rgba(15,15,24,0.96);border:1px solid var(--border);border-radius:60px;padding:10px 18px;backdrop-filter:blur(12px);}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.18);cursor:pointer;transition:all .3s;}
+.dot.on{background:var(--acc);width:28px;border-radius:4px;}
+.arr{background:none;border:1px solid var(--border);color:var(--txt);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:border-color .2s;}
+.arr:hover{border-color:var(--acc);}
+.tmr{font-family:var(--mono);font-size:11px;color:var(--muted);padding:0 8px;min-width:44px;text-align:center;}
+
+/* type */
+.label{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--acc);margin-bottom:14px;}
+.h1{font-size:clamp(38px,5vw,72px);font-weight:800;line-height:0.97;letter-spacing:-1.5px;margin-bottom:14px;}
+.h1 em{font-style:italic;color:var(--acc);}
+.h2{font-size:clamp(26px,3.5vw,48px);font-weight:800;line-height:1.0;letter-spacing:-1px;margin-bottom:12px;}
+.h2 em{font-style:italic;color:var(--acc);}
+.sub{font-size:15px;color:var(--muted);line-height:1.7;}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+
+.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;transition:border-color .2s;}
+.card:hover{border-color:rgba(212,240,58,.3);}
+.ctag{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--acc);margin-bottom:10px;}
+.ctag2{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--acc2);}
+.ctitle{font-size:14px;font-weight:700;margin-bottom:7px;}
+.cdesc{font-size:12px;color:var(--muted);line-height:1.65;}
+.cproof{font-size:11px;color:rgba(255,255,255,.3);font-style:italic;line-height:1.5;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+
+/* bars */
+.bwrap{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:22px;}
+.brow{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
+.brow:last-of-type{margin-bottom:0;}
+.blbl{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;}
+.btrack{height:7px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;}
+.bfill{height:100%;border-radius:4px;width:0;transition:width 1.3s cubic-bezier(.4,0,.2,1);}
+.bbad{background:#3a3a4a;}
+.bgood{background:var(--acc);box-shadow:0 0 8px rgba(212,240,58,.5);}
+
+/* timeline strip */
+.tl{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:16px;}
+.tlcol{flex:1;padding:13px 15px;border-right:1px solid var(--border);}
+.tlcol:last-child{border-right:none;}
+.tldot{width:7px;height:7px;border-radius:50%;background:var(--acc);margin-bottom:7px;box-shadow:0 0 6px rgba(212,240,58,.5);}
+.tlw{font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px;}
+.tlt{font-size:11px;font-weight:600;}
+
+/* funnel flow */
+.flow{display:flex;align-items:center;gap:0;margin-top:20px;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.fstep{flex:1;padding:20px 18px;border-right:1px solid var(--border);position:relative;}
+.fstep:last-child{border-right:none;}
+.fstep-num{font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:8px;}
+.fstep-title{font-size:14px;font-weight:700;margin-bottom:6px;}
+.fstep-desc{font-size:11px;color:var(--muted);line-height:1.6;}
+.farrow{position:absolute;right:-10px;top:50%;transform:translateY(-50%);width:20px;height:20px;background:var(--bg);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--acc);z-index:2;}
+
+/* smart flow */
+.sfrow{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:flex;gap:12px;margin-bottom:8px;transition:border-color .3s,background .3s;}
+.sfrow:last-child{margin-bottom:0;}
+.sfrow.lit{border-color:rgba(212,240,58,.4);background:rgba(212,240,58,.03);}
+.sfnum{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--acc);line-height:1;flex-shrink:0;min-width:28px;}
+.sftitle{font-size:13px;font-weight:600;margin-bottom:2px;}
+.sfdesc{font-size:11px;color:var(--muted);line-height:1.5;}
+.sfbadge{font-family:var(--mono);font-size:9px;color:var(--acc);margin-top:4px;}
+
+/* long term */
+.ltrow{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+.ltcard{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px 18px;display:flex;gap:20px;align-items:flex-start;}
+.ltphase{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--acc2);text-transform:uppercase;min-width:90px;padding-top:2px;flex-shrink:0;}
+.lttitle{font-size:13px;font-weight:700;margin-bottom:4px;}
+.ltdesc{font-size:12px;color:var(--muted);line-height:1.6;}
+.ltunlock{font-size:11px;color:var(--acc2);margin-top:5px;}
+
+/* rev bars */
+.revbar{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:18px;margin-top:12px;}
+.revtitle{font-size:11px;color:var(--muted);margin-bottom:12px;font-family:var(--mono);}
+.revrow{display:flex;align-items:center;gap:12px;margin-bottom:9px;}
+.revrow:last-child{margin-bottom:0;}
+.revlbl{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:62px;}
+.revtrack{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;}
+.revfill{height:100%;border-radius:3px;background:var(--acc2);width:0;transition:width 1.3s cubic-bezier(.4,0,.2,1);}
+.revval{font-family:var(--mono);font-size:10px;color:var(--acc2);min-width:64px;text-align:right;}
+
+/* stat row */
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:20px;}
+.stat{padding:18px 20px;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.statn{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--acc);line-height:1;margin-bottom:4px;}
+.statl{font-size:11px;color:var(--muted);line-height:1.4;}
+
+/* summary */
+.sask{margin-top:20px;background:rgba(212,240,58,.05);border:1px solid rgba(212,240,58,.18);border-radius:12px;padding:22px;}
+.saskt{font-size:20px;font-weight:800;margin-bottom:8px;line-height:1.3;}
+.saskt em{font-style:italic;color:var(--acc);}
+.sasks{font-size:13px;color:var(--muted);line-height:1.7;}
+.pts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+.pt{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.ptlabel{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-bottom:10px;}
+.ptlabel2{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--acc2);margin-bottom:10px;}
+.ptp{display:flex;gap:9px;margin-bottom:9px;}
+.ptp:last-child{margin-bottom:0;}
+.ptbullet{width:5px;height:5px;border-radius:50%;background:var(--acc);flex-shrink:0;margin-top:5px;}
+.ptbullet2{width:5px;height:5px;border-radius:50%;background:var(--acc2);flex-shrink:0;margin-top:5px;}
+.pttext{font-size:12px;color:var(--muted);line-height:1.6;}
+.pttext strong{color:var(--txt);}
+
+/* mock form */
+.mform{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:22px;}
+.mftitle{font-size:15px;font-weight:700;margin-bottom:4px;}
+.mfsub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.ff{margin-bottom:10px;}
+.flbl{display:block;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.finp{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--txt);padding:9px 12px;border-radius:7px;font-family:var(--sans);font-size:13px;outline:none;}
+.fsel{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--txt);padding:9px 12px;border-radius:7px;font-family:var(--sans);font-size:13px;outline:none;appearance:none;}
+.fbtn{width:100%;background:var(--acc);color:var(--bg);border:none;padding:10px;border-radius:7px;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;}
+.fnote{font-size:10px;color:var(--muted);text-align:center;margin-top:6px;}
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+
+
+<!-- ═══════════════════════════════════════
+  SLIDE 0: INTRO
+═══════════════════════════════════════ -->
+<div class="slide active" id="s0">
+  <div class="gbg"></div>
+  <div class="gorb" style="width:600px;height:600px;top:50%;left:50%;transform:translate(-20%,-50%);background:radial-gradient(circle,rgba(212,240,58,0.08) 0%,rgba(58,240,200,0.04) 40%,transparent 70%);"></div>
+  <div class="snum" style="font-size:13px;opacity:1;color:var(--acc);font-family:var(--mono);letter-spacing:1.5px;">University of Exeter &nbsp;·&nbsp; Vuyo &amp; Francis &nbsp;·&nbsp; United Kingdom</div>
+  <div class="inner" style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:0 72px;">
+    <div style="width:100%;">
+      <div class="label" style="margin-bottom:20px;">Global Scaling Challenge 2026: Finals</div>
+      <div class="h1" style="font-size:clamp(52px,7vw,100px);margin-bottom:28px;">Taking ASE<br>from <em>lab to market.</em></div>
+      <p style="font-size:18px;color:var(--muted);line-height:1.8;max-width:720px;margin-bottom:48px;">We are a two-person undergraduate team from the University of Exeter. Over the past two weeks we have analysed ASE's technology, market position and commercial infrastructure to identify where the biggest scaling opportunities sit.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div style="background:var(--s1);border:1px solid rgba(212,240,58,0.25);border-radius:14px;padding:28px 30px;">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--acc);text-transform:uppercase;margin-bottom:14px;">Technology Lens</div>
+          <div style="font-size:22px;font-weight:700;margin-bottom:10px;">Product Development</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7;">A fast lane commercialising drag-reduction surfaces now, and a slow lane developing quantum algorithms and advanced materials in parallel, each funding and protecting the other.</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid rgba(212,240,58,0.15);border-radius:14px;padding:28px 30px;">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--acc);text-transform:uppercase;margin-bottom:14px;">Marketing Lens</div>
+          <div style="font-size:22px;font-weight:700;margin-bottom:10px;">Social and Marketing Infrastructure</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7;">A three-stage marketing funnel, rebuilt website, smart lead capture and phased paid distribution to create a commercial pipeline from nothing.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+  SLIDE 1: REC 1: DUAL SPEED OVERVIEW
+═══════════════════════════════════════ -->
+<div class="slide" id="s1">
+  <div class="gbg"></div>
+  <div class="gorb" style="width:500px;height:500px;top:0%;right:-100px;background:radial-gradient(circle,rgba(58,240,200,0.07) 0%,transparent 70%);"></div>
+  <div class="snum">Recommendation 1 of 2: Technology Strategy</div>
+  <div class="inner" style="height:100%;display:flex;flex-direction:column;justify-content:center;padding:56px 72px 90px;">
+    <div class="label" style="margin-bottom:14px;">Phase 1: 0 to 12 Months</div>
+    <div class="h2" style="font-size:clamp(24px,3.5vw,50px);margin-bottom:20px;">Two timelines running<br><em>simultaneously.</em></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div style="background:var(--s1);border:1px solid rgba(58,240,200,0.3);border-radius:12px;padding:22px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--acc2);text-transform:uppercase;margin-bottom:12px;">Fast Lane: Near Term</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:10px;">Drag-Reduction Adhesive Strips</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;">The beachhead product. Already at TRL 5 to 6, close to commercial deployment. Delivers 5 to 50% drag reduction and 10 to 25% fuel savings, with peaks of up to 39% in testing. Existing solutions sit at around 0.8%. This is not a marginal gain. It is a step change. Marine first, because fuel consumption is high and regulation is low, meaning faster adoption and immediate cost savings for buyers.</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:72%;background:var(--acc2);border-radius:3px;box-shadow:0 0 8px rgba(58,240,200,0.4);"></div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--acc2);">TRL 5-6</div>
+        </div>
+      </div>
+      <div style="background:var(--s1);border:1px solid rgba(212,240,58,0.15);border-radius:12px;padding:22px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--acc);text-transform:uppercase;margin-bottom:12px;">Slow Lane: Long Term</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:10px;">Quantum Algorithms and Advanced Materials</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;">Running in the background from day one. Advanced CFD, early-stage quantum simulation at TRL 2 to 3, and next-generation materials at TRL 3 to 4. Critically, this is externally funded through grants, so it does not compete with the fast lane for capital. It builds the long-term defensibility that prevents the technology being copied or made redundant once the fast lane generates revenue.</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:35%;background:var(--acc);border-radius:3px;"></div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--acc);">TRL 2-4</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:rgba(58,240,200,0.05);border:1px solid rgba(58,240,200,0.2);border-radius:10px;padding:16px 20px;">
+      <div style="font-size:13px;color:var(--acc2);font-weight:700;margin-bottom:4px;">The fast lane works only with independent validation. The slow lane is what makes it defensible.</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.65;">Wind tunnel testing, real-world trials and third-party certification are non-negotiable for the fast lane. Without them, there are no enterprise contracts and no licensing deals. ASE's 3 to 5 day design-to-testing cycle is the competitive advantage that keeps the fast lane ahead. Meanwhile the slow lane runs on external funding, building the quantum and materials platform that will protect revenue once competitors begin to copy. By month 12: validation complete, initial revenue in, marine market entry secured.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+  SLIDE 2: PHASE 2: SCALING ENGINE
+═══════════════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="gbg"></div>
+  <div class="snum">Recommendation 1 of 2: Technology Strategy</div>
+  <div class="inner" style="height:100%;display:flex;flex-direction:column;justify-content:center;padding:52px 72px 90px;">
+    <div class="label" style="margin-bottom:12px;">Phase 2: 12 to 48 Months</div>
+    <div class="h2" style="font-size:clamp(22px,3vw,42px);margin-bottom:20px;">From product to <em>platform.</em></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;">
+
+      <div style="background:var(--s1);border:1px solid rgba(58,240,200,0.25);border-radius:12px;padding:18px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--acc2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Market expansion</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">Marine to Trucks to EVs</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">ASE expands from marine into trucks, logistics and eventually electric vehicles. The core surface technology is applied across each sector without redesigning from scratch. The same fast lane, broader reach.</div>
+      </div>
+
+      <div style="background:var(--s1);border:1px solid rgba(212,240,58,0.2);border-radius:12px;padding:18px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--acc);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Business model shift</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">Technology and IP Company</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">A major shift happens here. ASE does not act as an OEM. Instead it partners with OEMs, licenses its technology and collects royalties, avoiding the hassle of production entirely. High-margin, asset-light revenue at scale.</div>
+      </div>
+
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Staying ahead</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">Version 1 to Version 2</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">Copying will happen. The CEO knows this. So instead of trying to prevent it, ASE stays ahead through continuous iteration. Version 1 at TRL 6. Version 2 moves toward TRL 7. The 3 to 5 day design-to-testing cycle creates a moving target competitors cannot keep up with.</div>
+      </div>
+
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Technology side</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">CFD, AI and Optional Quantum Upside</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">ASE continues scaling through advanced CFD and AI. Quantum remains optional upside, progressing toward TRL 6 to 7 over time. Even if quantum is delayed, the business still grows. Classical systems are sufficient to maintain the competitive edge.</div>
+      </div>
+
+      <div style="background:rgba(212,240,58,0.04);border:1px solid rgba(212,240,58,0.2);border-radius:12px;padding:18px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--acc);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">By years 3 to 4</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--acc);">Multi-industry. Licensing active. Profitable.</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">Multi-industry adoption secured. OEM licensing model activated. Strong IP advantage established. ASE strengthens execution internally through clearer structure, stronger leadership and improved commercial capability. A scalable, profitable business.</div>
+      </div>
+
+    </div>
+
+    <!-- TESLA ANALOGY BAR — kept as is -->
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 22px;display:grid;grid-template-columns:1fr 2px 1fr;gap:20px;align-items:center;">
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Tesla: Proven Analogue</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">Started with the Roadster: low volume, high margin, immediate revenue. Used that revenue to scale to Model S then Model 3. Ran batteries, AI and autonomy as parallel deep tech programmes throughout. Never stopped the long-term work while commercialising the near-term product.</div>
+      </div>
+      <div style="background:var(--border);height:100%;"></div>
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--acc2);text-transform:uppercase;margin-bottom:8px;">ASE: Same Logic</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">Drag surfaces are the Roadster. Marine is the early market. As revenue scales, ASE transitions to a licensing platform, exactly as Tesla transitioned from niche product to global platform. Quantum and advanced materials are the batteries: running in parallel, ready when the hardware matures.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+  SLIDE 3 (NEW): PHASE 3: DEEP TECH PLATFORM
+═══════════════════════════════════════ -->
+<div class="slide" id="s3">
+  <div class="gbg"></div>
+  <div class="gorb" style="width:500px;height:500px;top:50%;right:-80px;transform:translateY(-50%);background:radial-gradient(circle,rgba(212,240,58,0.07) 0%,rgba(58,240,200,0.04) 40%,transparent 70%);"></div>
+  <div class="snum">Recommendation 1 of 2: Technology Strategy</div>
+  <div class="inner" style="height:100%;display:flex;flex-direction:column;justify-content:center;padding:52px 72px 90px;">
+    <div class="label" style="margin-bottom:12px;">Phase 3: 48 Months and Beyond</div>
+    <div class="h2" style="font-size:clamp(22px,3.2vw,48px);margin-bottom:22px;">From surface improvements<br>to <em>full-stack platform.</em></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;">
+
+      <div style="background:var(--s1);border:1px solid rgba(58,240,200,0.25);border-radius:12px;padding:20px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--acc2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Full integration</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">One Integrated System</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">Surface engineering, advanced materials and quantum algorithms combine into a single platform. Core technologies approach TRL 7 to 9, unlocking eligibility for non-dilutive government grants and large-scale institutional contracts.</div>
+      </div>
+
+      <div style="background:var(--s1);border:1px solid rgba(212,240,58,0.2);border-radius:12px;padding:20px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--acc);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Quantum position</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">Upside if Ready, Lead if Not</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">If quantum hardware is mature, it enhances performance further: faster simulation, better materials, deeper optimisation. If not, ASE still leads using classical systems. The algorithms are already written and waiting. Either way, ASE wins.</div>
+      </div>
+
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Value chain</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">System-Level Optimisation</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">ASE shifts from improving individual surfaces to optimising entire systems: vehicles, fleets and energy infrastructure. Not just reducing drag on a boat hull, but engineering the performance of the whole system around it.</div>
+      </div>
+
+    </div>
+
+    <div style="background:rgba(212,240,58,0.04);border:1px solid rgba(212,240,58,0.2);border-radius:12px;padding:20px 24px;display:grid;grid-template-columns:1fr 2px 1fr;gap:24px;align-items:center;">
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--acc);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Global scale</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">Licensing, OEM Partnerships, Global Expansion</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">ASE scales through licensing, partnerships with OEMs and expansion across industries. High-margin royalty revenues with minimal marginal cost per unit. Revenue in the hundreds of millions by Year 9. NASDAQ target by Year 10.</div>
+      </div>
+      <div style="background:var(--border);height:100%;"></div>
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--acc2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">The destination</div>
+        <div style="font-size:22px;font-weight:800;color:var(--txt);line-height:1.2;margin-bottom:8px;">Not just a product company.<br><em style="color:var(--acc);font-style:italic;">A global deep-tech platform.</em></div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">That is how ASE scales. Not just fast, but credibly. Fast lane generates revenue today. Slow lane builds what competitors cannot replicate tomorrow.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SLIDE 4: THE PROBLEM + OUR APPROACH -->
+<div class="slide" id="s4">
+  <div class="gbg"></div>
+  <div class="gorb" style="width:480px;height:480px;top:50%;left:60%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(212,240,58,0.07) 0%,rgba(58,240,200,0.03) 40%,transparent 70%);"></div>
+  <div class="snum">Recommendation 2 of 2: Marketing and Social</div>
+  <div class="inner" style="height:100%;display:flex;align-items:center;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;width:100%;">
+      <div>
+        <div class="label" style="font-size:11px;margin-bottom:16px;">The Commercial Gap</div>
+        <div class="h1" style="font-size:clamp(44px,5.5vw,80px);margin-bottom:20px;">Strong science.<br><em>No pipeline.</em></div>
+        <p style="font-size:17px;color:var(--muted);line-height:1.8;max-width:480px;margin-bottom:28px;">ASE has the R&D 100 award, Forbes coverage and Sandia validation. But there is no LinkedIn presence, no structured website, and no system to turn interest into revenue. The technology is not the problem.</p>
+        <div class="statrow">
+          <div class="stat">
+            <div class="statn" style="font-size:36px;">39.1%</div>
+            <div class="statl" style="font-size:13px;">Peak drag reduction, independently validated at Mach 0.64</div>
+          </div>
+          <div class="stat">
+            <div class="statn" style="font-size:36px;">$3,416</div>
+            <div class="statl" style="font-size:13px;">Saved per truck per year at 10% drag reduction</div>
+          </div>
+          <div class="stat">
+            <div class="statn" style="font-size:36px;">0</div>
+            <div class="statl" style="font-size:13px;">Active social channels or lead capture systems</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="bwrap">
+          <div class="label" style="font-size:10px;margin-bottom:18px;">Drag Reduction vs Competitors</div>
+          <div class="brow">
+            <div class="blbl" style="font-size:13px;"><span>Lufthansa Technik riblets</span><span style="color:var(--muted)">0.8%</span></div>
+            <div class="btrack" style="height:9px;"><div class="bfill bbad" data-w="2%"></div></div>
+          </div>
+          <div class="brow">
+            <div class="blbl" style="font-size:13px;"><span>3M shark skin films</span><span style="color:var(--muted)">approx. 3%</span></div>
+            <div class="btrack" style="height:9px;"><div class="bfill bbad" data-w="8%"></div></div>
+          </div>
+          <div class="brow">
+            <div class="blbl" style="font-size:13px;"><span>ASE: typical application</span><span style="color:var(--acc)">5 to 22%</span></div>
+            <div class="btrack" style="height:9px;"><div class="bfill bgood" data-w="56%"></div></div>
+          </div>
+          <div class="brow" style="margin-bottom:0;">
+            <div class="blbl" style="font-size:13px;"><span>ASE: peak validated (SNL, 2022)</span><span style="color:var(--acc)">39.1%</span></div>
+            <div class="btrack" style="height:9px;"><div class="bfill bgood" data-w="100%"></div></div>
+          </div>
+          <div style="margin-top:22px;padding:18px;border:1px solid rgba(212,240,58,.15);border-radius:8px;background:rgba(212,240,58,.04);">
+            <div style="font-size:14px;color:var(--muted);line-height:1.7;">The technology outperforms every known competitor by a significant margin. The gap is not the product. <strong style="color:var(--txt)">The gap is the commercial infrastructure around it.</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: AWARENESS GAP + FUNNEL -->
+<div class="slide" id="s5" style="padding:0;overflow:hidden;">
+  <div class="gbg"></div>
+  <div class="gorb" style="width:600px;height:600px;top:10%;right:-150px;background:radial-gradient(circle,rgba(212,240,58,0.05) 0%,transparent 70%);"></div>
+  <div class="snum">Recommendation 2 of 2: Marketing and Social</div>
+
+  <!-- FULL BLEED GRID: left panel | right panel -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;height:100%;width:100%;">
+
+    <!-- LEFT: ANALOGY -->
+    <div style="padding:56px 48px 80px 72px;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--border);">
+      <div class="label" style="margin-bottom:16px;">The Awareness Gap</div>
+      <div class="h2" style="font-size:clamp(26px,3.5vw,52px);margin-bottom:24px;">This is not a skill gap.<br>It is an <em>awareness gap.</em></div>
+
+      <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:20px;">
+        Think of a world-class surgeon with 30 years of experience, every major award in their field, published in every leading journal. But no website, no referrals system and no way for a patient to find them. The skill is not the problem. The visibility is.
+      </p>
+
+      <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:24px;">
+        ASE is that surgeon. An R&D 100 award. Forbes coverage. Validation from Sandia National Laboratories. And according to LinkedIn's 2024 B2B marketing benchmarks, <strong style="color:var(--txt);">over 75% of B2B buyers research a vendor digitally before making any contact.</strong> If ASE cannot be found, none of the science reaches the buyers who need it.
+      </p>
+
+      <div style="border-left:2px solid var(--acc);padding-left:20px;">
+        <div style="font-size:16px;font-weight:700;color:var(--acc);margin-bottom:6px;">The gap is not what they have built. It is who knows about it.</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.75;">You can have the best product in any market and still lose to a competitor with a weaker product and a stronger presence. Awareness is not optional in B2B. It is the prerequisite to everything else.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: FUNNEL SVG + TIMELINE — annotations increased in font size -->
+    <div style="padding:40px 56px 80px 48px;display:flex;flex-direction:column;justify-content:center;">
+      <div class="label" style="margin-bottom:14px;">The Three-Stage Funnel</div>
+
+      <svg viewBox="0 0 580 530" width="100%" style="display:block;flex:1;max-height:430px;">
+        <defs>
+          <linearGradient id="fg1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(212,240,58,0.25)"/>
+            <stop offset="100%" stop-color="rgba(212,240,58,0.06)"/>
+          </linearGradient>
+          <linearGradient id="fg2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(212,240,58,0.15)"/>
+            <stop offset="100%" stop-color="rgba(212,240,58,0.04)"/>
+          </linearGradient>
+          <linearGradient id="fg3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(212,240,58,0.10)"/>
+            <stop offset="100%" stop-color="rgba(212,240,58,0.02)"/>
+          </linearGradient>
+        </defs>
+
+        <!-- TRIANGLE SECTIONS — centred at x=290 -->
+        <polygon points="290,14 110,178 470,178" fill="url(#fg1)" stroke="rgba(212,240,58,0.4)" stroke-width="1.2"/>
+        <polygon points="110,182 470,182 398,308 182,308" fill="url(#fg2)" stroke="rgba(212,240,58,0.22)" stroke-width="1"/>
+        <polygon points="182,312 398,312 290,460" fill="url(#fg3)" stroke="rgba(212,240,58,0.14)" stroke-width="1"/>
+
+        <!-- STAGE LABELS INSIDE -->
+        <text x="290" y="90" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="16" font-weight="700" fill="#eeeae2">Awareness</text>
+        <text x="290" y="112" text-anchor="middle" font-family="'Courier New',monospace" font-size="10" letter-spacing="2" fill="#d4f03a">STAGE 1</text>
+        <text x="290" y="130" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#8a8798">Top of funnel</text>
+
+        <text x="290" y="234" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="15" font-weight="700" fill="#eeeae2">Capture</text>
+        <text x="290" y="252" text-anchor="middle" font-family="'Courier New',monospace" font-size="10" letter-spacing="2" fill="#d4f03a">STAGE 2</text>
+        <text x="290" y="270" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#8a8798">Middle of funnel</text>
+
+        <text x="290" y="374" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#eeeae2">Conversion</text>
+        <text x="290" y="392" text-anchor="middle" font-family="'Courier New',monospace" font-size="10" letter-spacing="2" fill="#d4f03a">STAGE 3</text>
+        <text x="290" y="410" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#8a8798">Bottom of funnel</text>
+
+        <!-- FLOW ARROWS BETWEEN STAGES -->
+        <line x1="290" y1="180" x2="290" y2="198" stroke="rgba(212,240,58,0.35)" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <polygon points="290,202 284,193 296,193" fill="rgba(212,240,58,0.5)"/>
+        <line x1="290" y1="310" x2="290" y2="328" stroke="rgba(212,240,58,0.25)" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <polygon points="290,332 284,323 296,323" fill="rgba(212,240,58,0.35)"/>
+
+        <!-- LEFT ANNOTATIONS — 14/13 -->
+        <circle cx="178" cy="96" r="3.5" fill="rgba(212,240,58,0.7)"/>
+        <line x1="175" y1="96" x2="106" y2="96" stroke="rgba(212,240,58,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="102" y="82" text-anchor="end" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#eeeae2">LinkedIn and Instagram</text>
+        <text x="102" y="100" text-anchor="end" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">ICP-targeted content</text>
+        <text x="102" y="116" text-anchor="end" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">Live in week 1</text>
+
+        <circle cx="206" cy="245" r="3.5" fill="rgba(212,240,58,0.5)"/>
+        <line x1="203" y1="245" x2="106" y2="245" stroke="rgba(212,240,58,0.3)" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="102" y="231" text-anchor="end" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#eeeae2">Whitepaper and ROI tool</text>
+        <text x="102" y="249" text-anchor="end" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">Gated behind email form</text>
+        <text x="102" y="265" text-anchor="end" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">Forrester: 74% choose first</text>
+
+        <circle cx="228" cy="386" r="3.5" fill="rgba(212,240,58,0.35)"/>
+        <line x1="225" y1="386" x2="106" y2="386" stroke="rgba(212,240,58,0.2)" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="102" y="372" text-anchor="end" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#eeeae2">Discovery call and Pilot</text>
+        <text x="102" y="390" text-anchor="end" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">Calendly on every page</text>
+        <text x="102" y="406" text-anchor="end" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">3 pilot partners per quarter</text>
+
+        <!-- RIGHT ANNOTATIONS — 14/13 -->
+        <circle cx="402" cy="96" r="3.5" fill="rgba(212,240,58,0.7)"/>
+        <line x1="405" y1="96" x2="474" y2="96" stroke="rgba(212,240,58,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="478" y="82" text-anchor="start" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#eeeae2">Rebuilt website</text>
+        <text x="478" y="100" text-anchor="start" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">ICP landing pages</text>
+        <text x="478" y="116" text-anchor="start" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">Single CTA per page</text>
+
+        <circle cx="374" cy="245" r="3.5" fill="rgba(212,240,58,0.5)"/>
+        <line x1="377" y1="245" x2="474" y2="245" stroke="rgba(212,240,58,0.3)" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="478" y="231" text-anchor="start" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#eeeae2">5-email nurture sequence</text>
+        <text x="478" y="249" text-anchor="start" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">Auto-triggered on signup</text>
+        <text x="478" y="265" text-anchor="start" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">Proof to ROI to close</text>
+
+        <circle cx="352" cy="386" r="3.5" fill="rgba(212,240,58,0.35)"/>
+        <line x1="355" y1="386" x2="474" y2="386" stroke="rgba(212,240,58,0.2)" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="478" y="372" text-anchor="start" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#eeeae2">Case study output</text>
+        <text x="478" y="390" text-anchor="start" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">Feeds back to stage 1</text>
+        <text x="478" y="406" text-anchor="start" font-family="-apple-system,sans-serif" font-size="13" fill="#8a8798">Flywheel begins</text>
+
+        <!-- BOTTOM LABEL -->
+        <text x="290" y="510" text-anchor="middle" font-family="'Courier New',monospace" font-size="13" letter-spacing="2" fill="rgba(212,240,58,0.5)">CONTENT TO CAPTURE TO CONVERSION</text>
+      </svg>
+
+      <!-- TIMELINE STRIP -->
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:12px;">
+        <div style="padding:12px 14px;border-right:1px solid var(--border);"><div style="width:7px;height:7px;border-radius:50%;background:var(--acc);margin-bottom:7px;"></div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px;">Week 1</div><div style="font-size:12px;font-weight:600;">LinkedIn live</div></div>
+        <div style="padding:12px 14px;border-right:1px solid var(--border);"><div style="width:7px;height:7px;border-radius:50%;background:var(--acc);margin-bottom:7px;"></div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px;">Week 1</div><div style="font-size:12px;font-weight:600;">Calendly active</div></div>
+        <div style="padding:12px 14px;border-right:1px solid var(--border);"><div style="width:7px;height:7px;border-radius:50%;background:var(--acc);margin-bottom:7px;"></div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px;">Week 2</div><div style="font-size:12px;font-weight:600;">Whitepaper live</div></div>
+        <div style="padding:12px 14px;border-right:1px solid var(--border);"><div style="width:7px;height:7px;border-radius:50%;background:var(--acc);margin-bottom:7px;"></div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px;">Week 2 to 3</div><div style="font-size:12px;font-weight:600;">Website launched</div></div>
+        <div style="padding:12px 14px;border-right:1px solid var(--border);"><div style="width:7px;height:7px;border-radius:50%;background:var(--acc);margin-bottom:7px;"></div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px;">Week 3</div><div style="font-size:12px;font-weight:600;">Email nurture on</div></div>
+        <div style="padding:12px 14px;"><div style="width:7px;height:7px;border-radius:50%;background:var(--acc);margin-bottom:7px;"></div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px;">Month 1</div><div style="font-size:12px;font-weight:600;">Leads in pipeline</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SLIDE 5: WEBSITE REVAMP -->
+<div class="slide" id="s6">
+  <div class="gbg"></div>
+  <div class="snum">Recommendation 2 of 2: Marketing and Social</div>
+  <div class="inner" style="height:100%;display:flex;flex-direction:column;justify-content:center;padding:44px 72px 90px;">
+    <div class="label" style="margin-bottom:10px;">The Website</div>
+    <div class="h2" style="font-size:clamp(24px,3.2vw,46px);margin-bottom:18px;">The current site loses buyers<br>in <em>under 8 seconds.</em></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start;flex:1;">
+      <div style="display:flex;flex-direction:column;justify-content:center;">
+        <!-- browser mockup -->
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,.5);">
+          <div style="background:var(--s2);padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">
+            <div style="width:10px;height:10px;border-radius:50%;background:#ff5f57;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#febc2e;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#28c840;"></div>
+            <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:4px;padding:4px 12px;font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;">appliedsurfaceengineering.com</div>
+          </div>
+          <div style="background:#09090e;padding:22px;">
+            <div style="padding:20px;border:1px solid rgba(212,240,58,.12);border-radius:8px;margin-bottom:12px;">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--acc);letter-spacing:2px;margin-bottom:9px;">APPLIED SURFACE ENGINEERING</div>
+              <div style="font-size:22px;font-weight:800;line-height:1.1;margin-bottom:9px;">Your fleet is losing<br><em style="font-style:italic;color:var(--acc);">millions to drag.</em><br>We fix that.</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Proven at 39.1% drag reduction for commercial marine, trucking and automotive fleets. Independently validated by Sandia National Laboratories, UNM and the US Department of Energy.</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div style="background:var(--acc);color:#09090e;font-size:11px;font-weight:700;padding:8px 16px;border-radius:4px;">Get a Free Drag Audit</div>
+                <div style="font-size:11px;color:var(--muted);border:1px solid var(--border);padding:7px 12px;border-radius:4px;">See the Data</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;">
+              <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center;">
+                <div style="font-family:var(--mono);font-size:13px;color:var(--acc);font-weight:700;">39.1%</div>
+                <div style="font-size:9px;color:var(--muted);margin-top:2px;">Peak drag reduction</div>
+              </div>
+              <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center;">
+                <div style="font-family:var(--mono);font-size:13px;color:var(--acc);font-weight:700;">$3,416</div>
+                <div style="font-size:9px;color:var(--muted);margin-top:2px;">Saved per truck/year</div>
+              </div>
+              <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center;">
+                <div style="font-family:var(--mono);font-size:13px;color:var(--acc);font-weight:700;">55%</div>
+                <div style="font-size:9px;color:var(--muted);margin-top:2px;">Less emissions</div>
+              </div>
+              <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center;">
+                <div style="font-family:var(--mono);font-size:13px;color:var(--acc);font-weight:700;">R&D 100</div>
+                <div style="font-size:9px;color:var(--muted);margin-top:2px;">Award winner</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <div style="font-size:9px;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--border);padding:4px 10px;border-radius:20px;">Sandia National Labs</div>
+              <div style="font-size:9px;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--border);padding:4px 10px;border-radius:20px;">Univ. of New Mexico</div>
+              <div style="font-size:9px;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--border);padding:4px 10px;border-radius:20px;">US Dept. of Energy</div>
+              <div style="font-size:9px;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--border);padding:4px 10px;border-radius:20px;">Forbes</div>
+              <div style="font-size:9px;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--border);padding:4px 10px;border-radius:20px;">ASME</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;">
+        <div class="label" style="margin-bottom:18px;">What changes and why</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="card" style="padding:18px 20px;">
+            <div style="display:flex;gap:16px;align-items:flex-start;">
+              <div style="font-size:26px;font-weight:800;color:var(--acc);line-height:1;flex-shrink:0;min-width:28px;">1</div>
+              <div><div class="ctitle" style="font-size:15px;">Outcomes-first headline</div><div class="cdesc" style="font-size:13px;">Fleet managers do not care about dimpling science. They care about fuel cost. The headline speaks to their problem in plain language before anything else appears on the page.</div></div>
+            </div>
+          </div>
+          <div class="card" style="padding:18px 20px;">
+            <div style="display:flex;gap:16px;align-items:flex-start;">
+              <div style="font-size:26px;font-weight:800;color:var(--acc);line-height:1;flex-shrink:0;min-width:28px;">2</div>
+              <div><div class="ctitle" style="font-size:15px;">Awards and institutions above the fold</div><div class="cdesc" style="font-size:13px;">R&D 100, Forbes, ASME, Sandia and DOE visible before any scrolling. A CTO or procurement lead needs to see these credentials within 8 seconds or they leave.</div></div>
+            </div>
+          </div>
+          <div class="card" style="padding:18px 20px;">
+            <div style="display:flex;gap:16px;align-items:flex-start;">
+              <div style="font-size:26px;font-weight:800;color:var(--acc);line-height:1;flex-shrink:0;min-width:28px;">3</div>
+              <div><div class="ctitle" style="font-size:15px;">One specific call to action</div><div class="cdesc" style="font-size:13px;">"Get a Free Drag Audit" rather than "Contact Us." Specific calls to action convert three times higher. The audit framing also pre-qualifies intent before anyone reaches the booking form.</div></div>
+            </div>
+          </div>
+          <div class="card" style="padding:18px 20px;">
+            <div style="display:flex;gap:16px;align-items:flex-start;">
+              <div style="font-size:26px;font-weight:800;color:var(--acc);line-height:1;flex-shrink:0;min-width:28px;">4</div>
+              <div><div class="ctitle" style="font-size:15px;">ICP-specific landing pages</div><div class="cdesc" style="font-size:13px;">Separate pages for marine, trucking and EV, each with the ROI numbers that matter to that buyer. A fleet manager and a marine engineer have different concerns. The site should reflect that.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: SMART CAPTURE -->
+<div class="slide" id="s7">
+  <div class="gbg"></div>
+  <div class="snum">Recommendation 2 of 2: Marketing and Social</div>
+  <div class="inner" style="height:100%;display:flex;flex-direction:column;justify-content:center;padding:44px 72px 90px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;width:100%;">
+      <div>
+        <div class="label" style="font-size:11px;">The Intelligence Layer</div>
+        <div class="h2" style="font-size:clamp(24px,3.2vw,44px);margin-bottom:12px;">Every lead is <em>qualified automatically.</em></div>
+        <p style="font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:20px;">When someone submits the audit form, the backend does the work without any human involvement.</p>
+        <div class="mform">
+          <div class="mftitle" style="font-size:17px;">Request Your Free Drag Audit</div>
+          <div class="mfsub" style="font-size:13px;">Tell us about your fleet and we will calculate what drag is costing you.</div>
+          <div class="ff"><label class="flbl">Name</label><input class="finp" value="James Harrington" readonly></div>
+          <div class="ff"><label class="flbl">Work email</label><input class="finp" value="j.harrington@norfolkfleet.co.uk" readonly></div>
+          <div class="ff"><label class="flbl">Company</label><input class="finp" value="Norfolk Marine Fleet Ltd" readonly></div>
+          <div class="ff"><label class="flbl">Sector</label><select class="fsel"><option>Commercial Marine</option></select></div>
+          <div class="ff"><label class="flbl">Fleet size</label><input class="finp" value="47 vessels" readonly></div>
+          <button class="fbtn" style="font-size:15px;" onclick="runFlow()">Get My Free Audit</button>
+          <div class="fnote" style="font-size:11px;">GDPR compliant. Your data is used only for your audit.</div>
+        </div>
+      </div>
+      <div>
+        <div class="label" style="font-size:11px;margin-bottom:18px;">What happens on the backend</div>
+        <div class="sfrow" id="fl1" style="padding:16px 18px;margin-bottom:10px;">
+          <div class="sfnum" style="font-size:22px;">1</div>
+          <div><div class="sftitle" style="font-size:15px;">Form submitted and consent logged</div><div class="sfdesc" style="font-size:13px;">Email, company, fleet size and sector captured. GDPR consent checkbox creates a compliant record for all future communications.</div><div class="sfbadge" style="font-size:11px;">Instant</div></div>
+        </div>
+        <div class="sfrow" id="fl2" style="padding:16px 18px;margin-bottom:10px;">
+          <div class="sfnum" style="font-size:22px;">2</div>
+          <div><div class="sftitle" style="font-size:15px;">Company enriched via LinkedIn</div><div class="sfdesc" style="font-size:13px;">Automated lookup through Apollo.io pulls company size, revenue band, industry and maps the decision-makers inside that organisation.</div><div class="sfbadge" style="font-size:11px;">Within 60 seconds</div></div>
+        </div>
+        <div class="sfrow" id="fl3" style="padding:16px 18px;margin-bottom:10px;">
+          <div class="sfnum" style="font-size:22px;">3</div>
+          <div><div class="sftitle" style="font-size:15px;">ICP match score assigned</div><div class="sfdesc" style="font-size:13px;">Scored against criteria: fleet size above 20 units, marine or trucking or EV industry, senior buying title, revenue above £2M. High score means fast track. Mid means nurture. Low means newsletter.</div><div class="sfbadge" style="font-size:11px;">Within 2 minutes</div></div>
+        </div>
+        <div class="sfrow" id="fl4" style="padding:16px 18px;">
+          <div class="sfnum" style="font-size:22px;">4</div>
+          <div><div class="sftitle" style="font-size:15px;">Routed to the correct sequence</div><div class="sfdesc" style="font-size:13px;">Score 8 or above: personalised audit PDF within 24 hours and a direct call from Dr. Rodriguez. Mid score: five-email nurture. Low score: newsletter and re-scored monthly.</div><div class="sfbadge" style="font-size:11px;">Fully automated</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: LONG TERM + SUMMARY -->
+<div class="slide" id="s8">
+  <div class="gbg"></div>
+  <div class="gorb" style="width:300px;height:300px;bottom:-60px;left:-60px;background:radial-gradient(circle,rgba(58,240,200,.05),transparent 70%);animation-delay:-3s;"></div>
+  <div class="snum">Recommendation 2 of 2: Marketing and Social</div>
+  <div class="inner" style="height:100%;display:flex;flex-direction:column;justify-content:center;padding:44px 72px 90px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start;width:100%;">
+      <div>
+        <div class="label" style="font-size:11px;">Long Term (3 to 12 Months)</div>
+        <div class="h2" style="font-size:clamp(22px,3vw,40px);margin-bottom:14px;">What the foundation <em>unlocks.</em></div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+          <div class="ltcard">
+            <div class="ltphase">Month 1 to 3</div>
+            <div><div class="lttitle" style="font-size:14px;">Paid LinkedIn advertising</div><div class="ltdesc" style="font-size:13px;">Once organic content shows what messaging converts, introduce paid ads targeting Fleet Managers and CTOs by industry. From £300 a month. Every lead is trackable from click to call.</div><div class="ltunlock" style="font-size:12px;">Unlocks a scalable pipeline beyond Dr. Rodriguez's personal network.</div></div>
+          </div>
+          <div class="ltcard">
+            <div class="ltphase">Month 2 to 4</div>
+            <div><div class="lttitle" style="font-size:14px;">ROI calculator tool</div><div class="ltdesc" style="font-size:13px;">A fleet operator inputs their fleet size and annual fuel spend and receives a personalised saving estimate. Email required for the full report. The buyer is pre-selling themselves.</div><div class="ltunlock" style="font-size:12px;">Converts passive interest to active inquiry without any manual effort.</div></div>
+          </div>
+          <div class="ltcard">
+            <div class="ltphase">Month 3 to 6</div>
+            <div><div class="lttitle" style="font-size:14px;">Industry events and PR</div><div class="ltdesc" style="font-size:13px;">Europort, Nor-Shipping, MATS trucking expo. Press releases using existing Forbes and ASME coverage. Dr. Rodriguez as a guest on Fleet Management Weekly and Maritime Executive podcasts.</div><div class="ltunlock" style="font-size:12px;">Puts ASE in front of thousands of exact-fit buyers at once.</div></div>
+          </div>
+          <div class="ltcard">
+            <div class="ltphase">Month 6 to 12</div>
+            <div><div class="lttitle" style="font-size:14px;">OEM partnership outreach</div><div class="ltdesc" style="font-size:13px;">Approach marine OEMs and truck manufacturers for factory-fit integration. Licensing model: ASE provides the IP and design spec, the OEM manufactures at scale. Revenue per unit with no manufacturing overhead.</div><div class="ltunlock" style="font-size:12px;">Unlocks the route from commercial revenue to institutional scale.</div></div>
+          </div>
+        </div>
+        <div class="revbar">
+          <div class="revtitle" style="font-size:12px;">Conservative revenue trajectory: marine beachhead only</div>
+          <div class="revrow"><div class="revlbl" style="font-size:11px;">Month 6</div><div class="revtrack"><div class="revfill" data-w="4%"></div></div><div class="revval" style="font-size:11px;">Pilots running</div></div>
+          <div class="revrow"><div class="revlbl" style="font-size:11px;">Month 9</div><div class="revtrack"><div class="revfill" data-w="18%"></div></div><div class="revval" style="font-size:11px;">First £40k</div></div>
+          <div class="revrow"><div class="revlbl" style="font-size:11px;">Year 2</div><div class="revtrack"><div class="revfill" data-w="45%"></div></div><div class="revval" style="font-size:11px;">£200k+</div></div>
+          <div class="revrow" style="margin-bottom:0;"><div class="revlbl" style="font-size:11px;">Year 4</div><div class="revtrack"><div class="revfill" data-w="100%"></div></div><div class="revval" style="font-size:11px;">£2M target</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="label" style="font-size:11px;margin-bottom:16px;">Summary</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="pt">
+            <div class="ptlabel" style="font-size:10px;">Immediate: 30 days</div>
+            <div class="ptp"><div class="ptbullet"></div><div class="pttext" style="font-size:13px;"><strong>LinkedIn and Instagram</strong> go live, built around Dr. Rodriguez's credentials and validated test data.</div></div>
+            <div class="ptp"><div class="ptbullet"></div><div class="pttext" style="font-size:13px;"><strong>Website rebuilt</strong> with ICP-specific landing pages and a single call to action on each.</div></div>
+            <div class="ptp"><div class="ptbullet"></div><div class="pttext" style="font-size:13px;"><strong>Gated whitepaper and ROI calculator</strong> capture leads 24 hours a day without any manual effort.</div></div>
+            <div class="ptp"><div class="ptbullet"></div><div class="pttext" style="font-size:13px;"><strong>Smart qualification backend</strong> means only high-fit prospects reach Dr. Rodriguez's calendar.</div></div>
+          </div>
+          <div class="pt">
+            <div class="ptlabel2" style="font-size:10px;">Long Term: 12 months</div>
+            <div class="ptp"><div class="ptbullet2"></div><div class="pttext" style="font-size:13px;"><strong>Paid ads from month 3</strong> once organic content proves what messaging works with the ICP.</div></div>
+            <div class="ptp"><div class="ptbullet2"></div><div class="pttext" style="font-size:13px;"><strong>Industry events and PR</strong> from month 3 to 6 put ASE in front of thousands of qualified buyers.</div></div>
+            <div class="ptp"><div class="ptbullet2"></div><div class="pttext" style="font-size:13px;"><strong>OEM outreach from month 6</strong>: licensing model, no manufacturing overhead, path to institutional scale.</div></div>
+          </div>
+          <div class="sask">
+            <div class="saskt" style="font-size:22px;">The science is ready.<br><em>The commercial infrastructure needs to catch up.</em></div>
+            <div class="sasks" style="font-size:14px;">This is a realistic, phased plan to build ASE a pipeline from nothing, using what already exists: the awards, the validation data, the press coverage. The cost of not doing this is a world-class technology that remains invisible to the buyers who need it most.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: CONCLUSION -->
+<div class="slide" id="s9">
+  <div class="gbg"></div>
+  <div class="gorb" style="width:700px;height:700px;top:50%;left:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(212,240,58,0.06) 0%,rgba(58,240,200,0.03) 50%,transparent 70%);"></div>
+  <div class="snum">University of Exeter Team · United Kingdom, Exeter</div>
+  <div class="inner" style="height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 72px;">
+    <div class="label" style="margin-bottom:20px;">Our Recommendation</div>
+    <div class="h1" style="font-size:clamp(36px,5vw,72px);margin-bottom:32px;max-width:820px;">The science exists.<br>The demand exists.<br><em>The system to connect them does not.</em></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:28px;">
+      <div style="background:var(--s1);border:1px solid rgba(58,240,200,0.25);border-radius:12px;padding:20px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--acc2);text-transform:uppercase;margin-bottom:10px;">Recommendation 1</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">Run two engines simultaneously</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">Fast lane commercialises surfaces now, validated at 39.1% peak drag reduction and 11% fuel savings in automotive trials. Slow lane runs quantum and materials on external funding in parallel. One protects the other. Same logic Tesla used to go from Roadster to the S&P 500.</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid rgba(212,240,58,0.2);border-radius:12px;padding:20px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--acc);text-transform:uppercase;margin-bottom:10px;">Recommendation 2</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">Build the commercial pipeline</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">LinkedIn, Instagram, rebuilt website, smart lead capture and phased paid ads. All of it live within 30 days. Over 75% of B2B buyers research digitally before any contact. ASE is currently invisible to all of them.</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">The Combined Effect</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">Revenue funds R&D. R&D protects revenue.</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.65;">Marine beachhead generates first revenue by month 9. Conservative target of £2M by year 4. That capital accelerates the deep tech timeline. The two recommendations are not independent. They are designed to work together.</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="padding:16px 20px;border-right:1px solid var(--border);">
+        <div style="font-family:var(--mono);font-size:26px;font-weight:700;color:var(--acc);line-height:1;margin-bottom:4px;">39.1%</div>
+        <div style="font-size:11px;color:var(--muted);">Peak drag reduction validated by Sandia National Labs at Mach 0.64</div>
+      </div>
+      <div style="padding:16px 20px;border-right:1px solid var(--border);">
+        <div style="font-family:var(--mono);font-size:26px;font-weight:700;color:var(--acc);line-height:1;margin-bottom:4px;">$6.83bn</div>
+        <div style="font-size:11px;color:var(--muted);">Annual diesel savings for the US semi-truck fleet at 10% drag reduction</div>
+      </div>
+      <div style="padding:16px 20px;border-right:1px solid var(--border);">
+        <div style="font-family:var(--mono);font-size:26px;font-weight:700;color:var(--acc);line-height:1;margin-bottom:4px;">75%</div>
+        <div style="font-size:11px;color:var(--muted);">of B2B buyers research digitally before any contact (LinkedIn 2024)</div>
+      </div>
+      <div style="padding:16px 20px;">
+        <div style="font-family:var(--mono);font-size:26px;font-weight:700;color:var(--acc);line-height:1;margin-bottom:4px;">£2M</div>
+        <div style="font-size:11px;color:var(--muted);">Conservative year 4 revenue target, marine beachhead only</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;text-align:center;">
+      <div style="font-size:13px;color:var(--muted);">Francis Kaldunski and Vuyo Malinga &nbsp;·&nbsp; University of Exeter &nbsp;·&nbsp; GSC Finals 2026</div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<!-- NAV -->
+<div class="nav" id="nav">
+  <button class="arr" onclick="prev()">&#8592;</button>
+  <div id="dots"></div>
+  <button id="tmrBtn" onclick="toggleTimer()" style="background:none;border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:border-color .2s;" title="Start / Stop">&#9654;</button>
+  <span class="tmr" id="tmr">0:00</span>
+  <button onclick="resetTimer()" style="background:none;border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:border-color .2s;" title="Reset">&#8635;</button>
+  <button class="arr" onclick="next()">&#8594;</button>
+</div>
+
+<script>
+const TOTAL=10;
+let cur=0,secs=0,timerRunning=false,timerInterval=null;
+const dotsEl=document.getElementById('dots');
+for(let i=0;i<TOTAL;i++){
+  const d=document.createElement('div');
+  d.className='dot'+(i===0?' on':'');
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+}
+function goTo(n){
+  if(n<0||n>=TOTAL)return;
+  document.getElementById('s'+cur).classList.remove('active');
+  cur=n;
+  const sl=document.getElementById('s'+cur);
+  sl.classList.add('active');
+  const inner=sl.querySelector('.inner');
+  if(inner){inner.style.animation='none';inner.offsetHeight;inner.style.animation='';}
+  document.querySelectorAll('.dot').forEach((d,i)=>d.className='dot'+(i===cur?' on':''));
+  setTimeout(()=>{sl.querySelectorAll('[data-w]').forEach(el=>{el.style.width=el.dataset.w;});},300);
+}
+function next(){goTo(cur+1);}
+function prev(){goTo(cur-1);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')next();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')prev();
+  if(e.key===' '){e.preventDefault();toggleTimer();}
+});
+function toggleTimer(){
+  if(timerRunning){
+    clearInterval(timerInterval);
+    timerRunning=false;
+    document.getElementById('tmrBtn').innerHTML='&#9654;';
+    document.getElementById('tmrBtn').style.borderColor='var(--border)';
+    document.getElementById('tmr').style.color='var(--muted)';
+  } else {
+    timerInterval=setInterval(()=>{
+      secs++;
+      const m=Math.floor(secs/60),s=secs%60;
+      document.getElementById('tmr').textContent=m+':'+(s<10?'0':'')+s;
+      if(secs>=210)document.getElementById('tmr').style.color='#f05a3a';
+      else if(secs>=180)document.getElementById('tmr').style.color='#f0c43a';
+    },1000);
+    timerRunning=true;
+    document.getElementById('tmrBtn').innerHTML='&#9646;&#9646;';
+    document.getElementById('tmrBtn').style.borderColor='rgba(212,240,58,0.5)';
+    document.getElementById('tmr').style.color='var(--acc)';
+  }
+}
+function resetTimer(){
+  clearInterval(timerInterval);
+  timerRunning=false;
+  secs=0;
+  document.getElementById('tmr').textContent='0:00';
+  document.getElementById('tmr').style.color='var(--muted)';
+  document.getElementById('tmrBtn').innerHTML='&#9654;';
+  document.getElementById('tmrBtn').style.borderColor='var(--border)';
+}
+function runFlow(){
+  [1,2,3,4].forEach((n,i)=>{
+    const el=document.getElementById('fl'+n);
+    if(el){el.classList.remove('lit');setTimeout(()=>el.classList.add('lit'),i*600+100);}
+  });
+}
+setTimeout(()=>{document.querySelectorAll('#s0 [data-w]').forEach(el=>{el.style.width=el.dataset.w;});},200);
+</script>
+</body>
+</html>
